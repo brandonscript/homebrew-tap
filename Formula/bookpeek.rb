@@ -20,6 +20,6 @@ class Bookpeek < Formula
   end
 
   test do
-    assert_match version.to_s, shell_output("#{bin}/bookpeek --version")
+    assert_match "scan", shell_output("#{bin}/bookpeek --help")
   end
 end
