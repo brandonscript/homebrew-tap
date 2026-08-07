@@ -59,46 +59,50 @@ class Bookpeek < Formula
     assert_match "scan", shell_output("#{bin}/bookpeek --help")
   end
 
-  # PyAV macOS wheels vendor dylibs with delocate placeholder IDs (/DLC/...).
-  # Homebrew cannot expand those into Cellar paths. Rewrite to @rpath quietly;
-  # preserve_rpath makes the post-install linkage fixer leave them alone.
+  # PyAV macOS wheels vendor dylibs under a HIDDEN .dylibs/ dir with /DLC/...
+  # placeholder IDs. Dir.glob skips dotdirs unless we name them explicitly.
+  # Rewrite to @rpath so Homebrew's linkage fixer (preserve_rpath) leaves them alone.
   def rewrite_pyav_delocate_dylibs!(venv)
-    files = Dir.glob("#{venv}/lib/*/site-packages/av/**/*.{dylib,so}").select do |f|
-      File.file?(f) && !File.symlink?(f)
-    end
-    return if files.empty?
+    dylib_dirs = Dir.glob("#{venv}/lib/*/site-packages/av/.dylibs")
+    odie "PyAV .dylibs not found under #{venv}" if dylib_dirs.empty?
+
+    install_name_tool = Utils.safe_popen_read("xcrun", "--find", "install_name_tool").strip
+    otool = Utils.safe_popen_read("xcrun", "--find", "otool").strip
+    codesign = "/usr/bin/codesign"
+
+    files = dylib_dirs.flat_map { |dir| Dir.glob("#{dir}/*.dylib") }
+                      .select { |f| File.file?(f) && !File.symlink?(f) }
+    # Also fix extension modules that may reference /DLC/ deps.
+    files += Dir.glob("#{venv}/lib/*/site-packages/av/**/*.so")
+                .select { |f| File.file?(f) && !File.symlink?(f) }
+
+    ohai "Rewriting #{files.count { |f| dylib_id_for(otool, f)&.start_with?("/DLC/") }} PyAV /DLC/ install names"
 
     files.each do |file|
       changed = false
 
-      id = dylib_id_for(file)
+      id = dylib_id_for(otool, file)
       if id&.start_with?("/DLC/")
-        chmod "u+w", file
-        unless quiet_system "/usr/bin/install_name_tool", "-id", "@rpath/#{File.basename(id)}", file
-          odie "install_name_tool -id failed for #{file}"
-        end
+        File.chmod(File.stat(file).mode | 0200, file)
+        odie "install_name_tool -id failed: #{file}" unless quiet_system install_name_tool, "-id", "@rpath/#{File.basename(id)}", file
         changed = true
       end
 
-      dylib_deps_for(file).each do |dep|
+      dylib_deps_for(otool, file).each do |dep|
         next unless dep.start_with?("/DLC/")
 
-        chmod "u+w", file
-        unless quiet_system "/usr/bin/install_name_tool", "-change", dep, "@rpath/#{File.basename(dep)}", file
-          odie "install_name_tool -change failed for #{file} (#{dep})"
-        end
+        File.chmod(File.stat(file).mode | 0200, file)
+        odie "install_name_tool -change failed: #{file}" unless quiet_system install_name_tool, "-change", dep, "@rpath/#{File.basename(dep)}", file
         changed = true
       end
 
       next unless changed && Hardware::CPU.arm?
 
-      # Ad-hoc sign only when we rewrote load commands; stay quiet (no ==> spew).
-      unless quiet_system "/usr/bin/codesign", "--force", "--sign", "-", file
-        odie "codesign failed for #{file}"
-      end
+      odie "codesign failed: #{file}" unless quiet_system codesign, "--force", "--sign", "-", file
     end
 
-    leftover = files.select { |f| dylib_id_for(f)&.start_with?("/DLC/") }
+    leftover = dylib_dirs.flat_map { |dir| Dir.glob("#{dir}/*.dylib") }
+                         .select { |f| dylib_id_for(otool, f)&.start_with?("/DLC/") }
     return if leftover.empty?
 
     odie <<~EOS
@@ -107,17 +111,15 @@ class Bookpeek < Formula
     EOS
   end
 
-  def dylib_id_for(file)
-    # otool -D prints the path, then the id.
-    lines = Utils.safe_popen_read("/usr/bin/otool", "-D", file).lines.map(&:strip).reject(&:empty?)
+  def dylib_id_for(otool, file)
+    lines = Utils.safe_popen_read(otool, "-D", file).lines.map(&:strip).reject(&:empty?)
     lines.last
   rescue
     nil
   end
 
-  def dylib_deps_for(file)
-    # First line is the file header; remaining lines are "name (compatibility ...)".
-    Utils.safe_popen_read("/usr/bin/otool", "-L", file)
+  def dylib_deps_for(otool, file)
+    Utils.safe_popen_read(otool, "-L", file)
          .lines
          .drop(1)
          .filter_map { |line| line.strip.split.first }
