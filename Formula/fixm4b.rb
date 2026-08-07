@@ -1,8 +1,8 @@
 class Fixm4b < Formula
   desc "Retag converted audiobooks (ID3 / filenames) without re-encoding"
   homepage "https://github.com/brandonscript/fixm4b"
-  url "https://files.pythonhosted.org/packages/85/80/c386c826dfe6140e7edf463394c1678ebcd415bd5d4183c2774250e5d2fb/fixm4b-0.1.1.tar.gz"
-  sha256 "308c1c618f236c5dd67992f516a7268096de19e2032055ec13c573d6de42dae2"
+  url "https://files.pythonhosted.org/packages/d5/c3/c7bdc80cd55bef0abc111d7d1a632585973e3972f015d75063802e26c2b8/fixm4b-0.1.2.tar.gz"
+  sha256 "7bfd587a88e7fdbef34dba4311b4b6063f50aa2805ddc0cab20395e52c54e05f"
   license "MIT"
 
   depends_on "python@3.14"
