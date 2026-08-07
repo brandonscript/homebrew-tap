@@ -8,6 +8,11 @@ class Bookpeek < Formula
   depends_on "ffmpeg"
   depends_on "python@3.14"
 
+  # Homebrew rewrites Mach-O install names under Cellar; PyAV's vendored
+  # dylibs ship with short /DLC/... IDs that lack headerpad for the longer
+  # Cellar path. Python dlopens them by filesystem path, so skipping is safe.
+  skip_clean "libexec"
+
   def install
     python = formula_opt_bin("python@3.14")/"python3.14"
     venv = libexec/"venv"
