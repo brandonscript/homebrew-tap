@@ -8,9 +8,22 @@ brew install goodscraps
 brew install bookpeek
 ```
 
-`goodscraps` installs its isolated Python runtime and CLI. `bookpeek` also
-installs `ffmpeg`, its online providers, ASR engines, and the spaCy English
-model so the command is ready to run after installation.
+`goodscraps` / `fixm4b` install an isolated Python runtime and CLI.
+
+`bookpeek` installs `ffmpeg`, Whisper ASR extras, and the spaCy English model
+by default:
+
+```bash
+brew install bookpeek
+```
+
+Vosk is optional (Homebrew option; uses Python 3.13 because Vosk has no 3.14 wheels):
+
+```bash
+brew install bookpeek --with-vosk
+# or
+brew reinstall bookpeek --with-vosk
+```
 
 ## Updating formulas
 

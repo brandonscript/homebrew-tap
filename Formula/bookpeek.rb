@@ -5,15 +5,28 @@ class Bookpeek < Formula
   sha256 "14217219e61eb41f7cdaed575c37a772455e133500ebfdc1174b21f0a3828eae"
   license "MIT"
 
+  option "with-vosk", "Also install the Vosk ASR engine (uses Python 3.13; no 3.14 wheels)"
+
   depends_on "ffmpeg"
   depends_on "pkgconf"
-  depends_on "python@3.14"
+  depends_on "python@3.14" if build.without?("vosk")
+  depends_on "python@3.13" if build.with?("vosk")
 
   # Keep @rpath install names on native wheels (ctranslate2, etc.).
   preserve_rpath
 
   def install
-    python = formula_opt_bin("python@3.14")/"python3.14"
+    if build.with?("vosk")
+      python_formula = "python@3.13"
+      python_bin = "python3.13"
+      extras = ".[whisper,vosk]"
+    else
+      python_formula = "python@3.14"
+      python_bin = "python3.14"
+      extras = ".[whisper]"
+    end
+
+    python = formula_opt_bin(python_formula)/python_bin
     venv = libexec/"venv"
 
     # Link PyAV against Homebrew ffmpeg instead of wheel-vendored /DLC/ dylibs
@@ -23,17 +36,24 @@ class Bookpeek < Formula
 
     system python, "-m", "venv", venv
     system venv/"bin/pip", "install", "--upgrade", "pip"
-    system venv/"bin/pip", "install", "--no-binary=av", ".[whisper]"
+    system venv/"bin/pip", "install", "--no-binary=av", extras
     system venv/"bin/python", "-m", "spacy", "download", "en_core_web_sm"
     bin.install_symlink venv/"bin/bookpeek"
   end
 
   def caveats
-    <<~EOS
-      Installed with the Whisper ASR extra (faster-whisper; mlx-whisper on Apple Silicon).
-      Vosk is omitted: it has no Python 3.14 wheels yet. For Vosk, use a 3.12/3.13 venv:
-        pip install 'bookpeek[vosk]'
-    EOS
+    if build.with?("vosk")
+      <<~EOS
+        Installed with Whisper + Vosk ASR engines (Python 3.13).
+        Default engine is still whisper; select Vosk with --engine vosk.
+      EOS
+    else
+      <<~EOS
+        Installed with the Whisper ASR extra (faster-whisper; mlx-whisper on Apple Silicon).
+        Vosk is opt-in (no Python 3.14 wheels):
+          brew reinstall bookpeek --with-vosk
+      EOS
+    end
   end
 
   test do
