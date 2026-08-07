@@ -14,9 +14,17 @@ class Bookpeek < Formula
 
     system python, "-m", "venv", venv
     system venv/"bin/pip", "install", "--upgrade", "pip"
-    system venv/"bin/pip", "install", ".[all]"
+    system venv/"bin/pip", "install", ".[whisper]"
     system venv/"bin/python", "-m", "spacy", "download", "en_core_web_sm"
     bin.install_symlink venv/"bin/bookpeek"
+  end
+
+  def caveats
+    <<~EOS
+      Installed with the Whisper ASR extra (faster-whisper; mlx-whisper on Apple Silicon).
+      Vosk is omitted: it has no Python 3.14 wheels yet. For Vosk, use a 3.12/3.13 venv:
+        pip install 'bookpeek[vosk]'
+    EOS
   end
 
   test do
