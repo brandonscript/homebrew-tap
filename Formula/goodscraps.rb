@@ -5,10 +5,10 @@ class Goodscraps < Formula
   sha256 "1425351a470d4eb5a73f5852b4ec4875f481ee83b2a5f41361d0874d9067cab8"
   license "MIT"
 
-  depends_on "python@3.13"
+  depends_on "python@3.14"
 
   def install
-    python = formula_opt_bin("python@3.13")/"python3.13"
+    python = formula_opt_bin("python@3.14")/"python3.14"
     venv = libexec/"venv"
 
     system python, "-m", "venv", venv

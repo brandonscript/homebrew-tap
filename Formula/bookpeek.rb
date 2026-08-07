@@ -6,10 +6,10 @@ class Bookpeek < Formula
   license "MIT"
 
   depends_on "ffmpeg"
-  depends_on "python@3.13"
+  depends_on "python@3.14"
 
   def install
-    python = formula_opt_bin("python@3.13")/"python3.13"
+    python = formula_opt_bin("python@3.14")/"python3.14"
     venv = libexec/"venv"
 
     system python, "-m", "venv", venv
