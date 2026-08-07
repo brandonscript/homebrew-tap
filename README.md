@@ -1,6 +1,6 @@
 # Audiobook utilities Homebrew tap
 
-Homebrew formulas for Brandon's audiobook command-line utilities:
+Homebrew formulas for audiobook management utilities
 
 ```bash
 brew tap brandonscript/tap
