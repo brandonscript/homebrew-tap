@@ -6,20 +6,24 @@ class Bookpeek < Formula
   license "MIT"
 
   depends_on "ffmpeg"
+  depends_on "pkgconf"
   depends_on "python@3.14"
 
-  # Homebrew rewrites Mach-O install names under Cellar; PyAV's vendored
-  # dylibs ship with short /DLC/... IDs that lack headerpad for the longer
-  # Cellar path. Python dlopens them by filesystem path, so skipping is safe.
-  skip_clean "libexec"
+  # Keep @rpath install names on native wheels (ctranslate2, etc.).
+  preserve_rpath
 
   def install
     python = formula_opt_bin("python@3.14")/"python3.14"
     venv = libexec/"venv"
 
+    # Link PyAV against Homebrew ffmpeg instead of wheel-vendored /DLC/ dylibs
+    # whose short install names cannot be expanded into Cellar paths.
+    ENV.append_path "PKG_CONFIG_PATH", Formula["ffmpeg"].opt_lib/"pkgconfig"
+    ENV.append "LDFLAGS", "-Wl,-headerpad_max_install_names" if OS.mac?
+
     system python, "-m", "venv", venv
     system venv/"bin/pip", "install", "--upgrade", "pip"
-    system venv/"bin/pip", "install", ".[whisper]"
+    system venv/"bin/pip", "install", "--no-binary=av", ".[whisper]"
     system venv/"bin/python", "-m", "spacy", "download", "en_core_web_sm"
     bin.install_symlink venv/"bin/bookpeek"
   end
