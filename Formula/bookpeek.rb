@@ -26,17 +26,20 @@ class Bookpeek < Formula
     end
 
     python = formula_opt_bin(python_formula)/python_bin
-    venv = libexec/"venv"
+    venv = HOMEBREW_PREFIX/"var"/"bookpeek"/"venv"
+    venv.parent.mkpath
 
     pip_cache = HOMEBREW_CACHE/"caches/bookpeek-pip"
     pip_cache.mkpath
     ENV["PIP_CACHE_DIR"] = pip_cache.to_s
 
-    system python, "-m", "venv", venv
+    system python, "-m", "venv", venv unless (venv/"bin/python").exist?
     system venv/"bin/pip", "install", "--upgrade", "pip"
-    system venv/"bin/pip", "install", extras
+    system venv/"bin/pip", "install", "--upgrade", extras
     rewrite_pyav_delocate_dylibs!(venv) if OS.mac?
-    system venv/"bin/python", "-m", "spacy", "download", "en_core_web_sm"
+    unless quiet_system venv/"bin/python", "-c", "import en_core_web_sm"
+      system venv/"bin/python", "-m", "spacy", "download", "en_core_web_sm"
+    end
     bin.install_symlink venv/"bin/bookpeek"
   end
 
