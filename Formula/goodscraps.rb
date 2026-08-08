@@ -1,8 +1,8 @@
 class Goodscraps < Formula
   desc "Read-only Goodreads metadata client and CLI"
   homepage "https://github.com/brandonscript/goodscraps"
-  url "https://files.pythonhosted.org/packages/6d/f1/850f57f280e1c2201d935763e3b9313d41dba4cc7bd6cc81884002b3e486/goodscraps-0.1.6.tar.gz"
-  sha256 "1425351a470d4eb5a73f5852b4ec4875f481ee83b2a5f41361d0874d9067cab8"
+  url "https://files.pythonhosted.org/packages/ff/18/040ff203082551857e0407e921a4383d3880f3dde74d899150a630160c06/goodscraps-0.1.7.tar.gz"
+  sha256 "01eb739f8dc84ff682f9abb671541f0b2b234336ef8704db8676273b41e252ae"
   license "MIT"
 
   depends_on "python@3.14"
