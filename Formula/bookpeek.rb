@@ -1,8 +1,8 @@
 class Bookpeek < Formula
   desc "Extract audiobook metadata from spoken introductions"
   homepage "https://github.com/brandonscript/bookpeek"
-  url "https://github.com/brandonscript/bookpeek/archive/refs/tags/v0.1.3.tar.gz"
-  sha256 "e41f48f1cbcdd2a55982e598c157603d04b6c11ac0c3f05b4ca23c962b6b80b8"
+  url "https://github.com/brandonscript/bookpeek/archive/refs/tags/v0.2.0.tar.gz"
+  sha256 "4220145c464ddf907eb81524508db025ed428e299aa50f8cecc8a0d556d0bc36"
   license "MIT"
 
   depends_on "ffmpeg"
