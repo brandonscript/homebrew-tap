@@ -10,20 +10,19 @@ brew install bookpeek
 
 `goodscraps` / `fixm4b` install an isolated Python runtime and CLI.
 
-`bookpeek` installs `ffmpeg`, Whisper ASR extras, and the spaCy English model
-by default:
+`bookpeek` installs `ffmpeg`, Whisper + Vosk ASR packages, online enrichment,
+and the spaCy English model:
 
 ```bash
 brew install bookpeek
 ```
 
-Vosk is optional (Homebrew option; uses Python 3.13 because Vosk has no 3.14 wheels):
+ASR **model weights** are not fetched at install time. On first
+`bookpeek scan`, bookpeek prompts to download them (or pass `-d`). Vosk models
+are stored under `~/.config/bookpeek/models/`.
 
-```bash
-brew install bookpeek --with-vosk
-# or
-brew reinstall bookpeek --with-vosk
-```
+On Apple Silicon, Vosk is installed from the matching bookpeek GitHub Release
+wheel.
 
 ## Updating formulas
 
@@ -33,11 +32,8 @@ GitHub release archive.
 
 ## Bookpeek install speed
 
-The formula installs Whisper extras as binary wheels and keeps a pip cache under
+The formula installs ASR extras as binary wheels and keeps a pip cache under
 Homebrew's cache directory (`$(brew --cache)/caches/bookpeek-pip`), so
 `brew reinstall bookpeek` reuses large wheels (ctranslate2, etc.) instead of
-re-downloading them.
-
-Whisper **model weights** are not fetched at install time — they download on
-first `bookpeek scan` into the normal Hugging Face / mlx cache locations.
-
+re-downloading them. The bookpeek venv persists under
+`$(brew --prefix)/var/bookpeek/venv`.

@@ -5,25 +5,17 @@ class Bookpeek < Formula
   sha256 "e41f48f1cbcdd2a55982e598c157603d04b6c11ac0c3f05b4ca23c962b6b80b8"
   license "MIT"
 
-  option "with-vosk", "Also install the Vosk ASR engine (uses Python 3.13; no 3.14 wheels)"
-
   depends_on "ffmpeg"
-  depends_on "python@3.14" if build.without?("vosk")
-  depends_on "python@3.13" if build.with?("vosk")
+  depends_on "python@3.14"
 
   # After we rewrite PyAV /DLC/ IDs to @rpath, keep them (do not expand to Cellar paths).
   preserve_rpath
 
   def install
-    if build.with?("vosk")
-      python_formula = "python@3.13"
-      python_bin = "python3.13"
-      extras = ".[whisper,vosk]"
-    else
-      python_formula = "python@3.14"
-      python_bin = "python3.14"
-      extras = ".[whisper]"
-    end
+    python_formula = "python@3.14"
+    python_bin = "python3.14"
+    # On Apple Silicon, vosk is layered from the release wheel after the package install.
+    extras = OS.mac? && Hardware::CPU.arm? ? ".[whisper,online]" : ".[whisper,vosk,online]"
 
     python = formula_opt_bin(python_formula)/python_bin
     venv = HOMEBREW_PREFIX/"var"/"bookpeek"/"venv"
@@ -36,6 +28,10 @@ class Bookpeek < Formula
     system python, "-m", "venv", venv unless (venv/"bin/python").exist?
     system venv/"bin/pip", "install", "--upgrade", "pip"
     system venv/"bin/pip", "install", "--upgrade", extras
+    if OS.mac? && Hardware::CPU.arm?
+      wheel = "https://github.com/brandonscript/bookpeek/releases/download/v#{version}/vosk-0.3.45-py3-none-macosx_11_0_arm64.whl"
+      system venv/"bin/pip", "install", "--upgrade", wheel
+    end
     rewrite_pyav_delocate_dylibs!(venv) if OS.mac?
     unless quiet_system venv/"bin/python", "-c", "import en_core_web_sm"
       system venv/"bin/python", "-m", "spacy", "download", "en_core_web_sm"
@@ -45,16 +41,15 @@ class Bookpeek < Formula
 
   def caveats
     cache = HOMEBREW_CACHE/"caches/bookpeek-pip"
-    engine = if build.with?("vosk")
-      "Whisper + Vosk (Python 3.13). Default engine is whisper; use --engine vosk to select Vosk."
-    else
-      "Whisper only (faster-whisper; mlx-whisper on Apple Silicon). Opt into Vosk with: brew reinstall bookpeek --with-vosk"
-    end
     <<~EOS
-      #{engine}
+      Whisper + Vosk are installed. Dual-engine scanning is the default; pass
+      --engine whisper or --engine vosk to use only one backend. ASR model
+      weights download on first scan into ~/.config/bookpeek/models/ (and the
+      Hugging Face cache for Whisper). Pass -d to download missing models
+      without prompting.
 
       Pip wheel cache (speeds up reinstalls): #{cache}
-      Whisper model weights download on first scan into the usual HF/cache dirs, not during brew install.
+      Persistent venv: #{HOMEBREW_PREFIX}/var/bookpeek/venv
     EOS
   end
 
