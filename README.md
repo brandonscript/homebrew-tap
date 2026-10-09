@@ -8,6 +8,18 @@ brew install goodscraps
 brew install bookpeek
 ```
 
+`plex-mgmt` is available from this public tap, but its source repository is
+private. Before installing, configure GitHub authentication for the private
+repository as described in [Homebrew's private Git source instructions](https://docs.brew.sh/FAQ#how-do-i-authenticate-private-git-source-downloads):
+
+```bash
+brew install brandonscript/tap/plex-mgmt
+```
+
+Copy the installed `env.example` shown by `brew info plex-mgmt` to
+`~/.config/plex-mgmt/.env` and fill in your own Plex connection details.
+The tap and package do not contain Plex credentials.
+
 `goodscraps` / `fixm4b` install an isolated Python runtime and CLI.
 
 `bookpeek` installs `ffmpeg`, Whisper + Vosk ASR packages, online enrichment,
