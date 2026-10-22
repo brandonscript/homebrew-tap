@@ -1,25 +1,12 @@
-# Brandonscript Homebrew tap
+# BrandonScript Homebrew tap
 
-Homebrew formulas for command-line utilities
+Homebrew formulas for image and audiobook utilities
 
 ```bash
 brew tap brandonscript/tap
 brew install goodscraps
 brew install bookpeek
 ```
-
-## Node mash
-
-Install Node mash for dependency deduplication and stale project cleanup on macOS:
-
-```bash
-brew install brandonscript/tap/node-mash
-node-mash dedupe ~/Dev
-```
-
-The command above previews changes. Cleanup requires `--apply`; installing does not start a service. Reports default to `~/.local/state/node-mash/reports`, configurable with `--report-dir`. See the [Node mash README](https://github.com/brandonscript/node-mash) for verification, purging, and scheduling details.
-
-## Audiobook utilities
 
 `plex-mgmt` is available from this public tap, but its source repository is
 private. Before installing, configure GitHub authentication for the private
@@ -62,3 +49,22 @@ Homebrew's cache directory (`$(brew --cache)/caches/bookpeek-pip`), so
 `brew reinstall bookpeek` reuses large wheels (ctranslate2, etc.) instead of
 re-downloading them. The bookpeek venv persists under
 `$(brew --prefix)/var/bookpeek/venv`.
+
+## Shrinx
+
+Convert PNG/JPEG/TIFF/BMP images to smaller WebP files, with metadata handling,
+per-type compression settings, optional verified Trash cleanup, and run reports.
+
+```sh
+brew install brandonscript/tap/shrinx
+mkdir -p ~/.config/shrinx
+cp "$(brew --prefix shrinx)/share/shrinx/config.example.json" ~/.config/shrinx/config.json
+shrinx run --dry-run
+```
+
+Copy the example only on first setup, then edit your folders and settings.
+Use `shrinx install` for its configured schedule (daily at 1 am by default),
+and `shrinx uninstall` before removing the package. Installing or upgrading
+with Homebrew does not automatically start conversions or enable the schedule.
+See the [Shrinx README](https://github.com/brandonscript/shrinx#readme)
+for metadata exemptions, relative compression, and configuration details.
