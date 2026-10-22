@@ -1,12 +1,25 @@
-# Audiobook utilities Homebrew tap
+# Brandonscript Homebrew tap
 
-Homebrew formulas for audiobook management utilities
+Homebrew formulas for command-line utilities
 
 ```bash
 brew tap brandonscript/tap
 brew install goodscraps
 brew install bookpeek
 ```
+
+## Node mash
+
+Install Node mash for dependency deduplication and stale project cleanup on macOS:
+
+```bash
+brew install brandonscript/tap/node-mash
+node-mash dedupe ~/Dev
+```
+
+The command above previews changes. Cleanup requires `--apply`; installing does not start a service. Reports default to `~/.local/state/node-mash/reports`, configurable with `--report-dir`. See the [Node mash README](https://github.com/brandonscript/node-mash) for verification, purging, and scheduling details.
+
+## Audiobook utilities
 
 `plex-mgmt` is available from this public tap, but its source repository is
 private. Before installing, configure GitHub authentication for the private
