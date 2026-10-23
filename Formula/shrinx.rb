@@ -1,8 +1,8 @@
 class Shrinx < Formula
   desc "Shrink images to WebP with verified metadata handling and scheduled cleanup"
   homepage "https://github.com/brandonscript/shrinx"
-  url "https://github.com/brandonscript/shrinx/archive/refs/tags/v0.1.0.tar.gz"
-  sha256 "d89aa0da6e7b954767d4041b60f2f667c99aa25c430e4cf157bf441382e330d2"
+  url "https://github.com/brandonscript/shrinx/archive/refs/tags/v0.1.1.tar.gz"
+  sha256 "c82589fe30fab5a61d5ad579c45f87244f31c7fd8217adbaefa3867abba67a51"
   license "MIT"
 
   depends_on "exiftool"
@@ -11,8 +11,8 @@ class Shrinx < Formula
   depends_on "webp"
 
   def install
-    libexec.install "shrinx.py", "metadata.py", "png_colors.py"
-    pkgshare.install "config.example.json"
+    libexec.install "shrinx.py", "metadata.py", "png_colors.py", "scheduling.py"
+    pkgshare.install "config.example.json", "docs"
     (bin/"shrinx").write <<~SH
       #!/bin/bash
       export SHRINX_SCRIPT="#{opt_libexec}/shrinx.py"
@@ -24,6 +24,17 @@ class Shrinx < Formula
     chmod 0755, bin/"shrinx"
   end
 
+  service do
+    run [opt_bin/"shrinx", "service"]
+    keep_alive true
+    run_at_load true
+    process_type :background
+    nice 10
+    environment_variables PATH: std_service_path_env
+    log_path var/"log/shrinx.log"
+    error_log_path var/"log/shrinx-error.log"
+  end
+
   def caveats
     <<~EOS
       On first setup, create your personal configuration:
@@ -33,17 +44,18 @@ class Shrinx < Formula
       Keep your existing config when upgrading. Edit the folders/settings, then:
         shrinx run --dry-run
         shrinx run
-        shrinx install
+        brew services start shrinx
 
       Installation does not start conversion or register a schedule.
-      Use `shrinx install`, not `brew services`, for the configured daily schedule.
-      Before removing the package, run `shrinx uninstall` to remove that schedule.
+      Use `brew services stop shrinx` before uninstalling.
+      Remove any legacy `shrinx install` schedule before starting Homebrew services.
+      For a single later run, use `shrinx schedule-once --at YYYY-MM-DDTHH:MM`.
     EOS
   end
 
   test do
     assert_match version.to_s, shell_output("#{bin}/shrinx --version")
-    assert_match "--config", shell_output("#{bin}/shrinx --help")
+    assert_match "schedule-once", shell_output("#{bin}/shrinx --help")
     python = formula_opt_bin("python@3.13")/"python3.13"
     system python, "-c", <<~PYTHON
       import json, struct, zlib
@@ -65,6 +77,7 @@ class Shrinx < Formula
     assert_path_exists testpath/"sample.webp"
     assert_path_exists testpath/"sample.png"
     assert_equal 1, (testpath/"reports").glob("run-*.json").length
+    system bin/"shrinx", "--config", testpath/"config.json", "service", "--once", "--dry-run"
     system formula_opt_bin("webp")/"dwebp", "-quiet", testpath/"sample.webp", "-o", File::NULL
   end
 end

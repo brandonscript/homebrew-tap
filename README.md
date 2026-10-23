@@ -63,8 +63,9 @@ shrinx run --dry-run
 ```
 
 Copy the example only on first setup, then edit your folders and settings.
-Use `shrinx install` for its configured schedule (daily at 1 am by default),
-and `shrinx uninstall` before removing the package. Installing or upgrading
+Use `brew services start shrinx` for its configured schedule (daily at 1 am by default),
+and `brew services stop shrinx` before removing the package. Use
+`shrinx schedule-once --at YYYY-MM-DDTHH:MM` for a single later run. Installing or upgrading
 with Homebrew does not automatically start conversions or enable the schedule.
 See the [Shrinx README](https://github.com/brandonscript/shrinx#readme)
 for metadata exemptions, relative compression, and configuration details.
