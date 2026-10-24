@@ -1,8 +1,8 @@
 class Dnspoke < Formula
   desc "Invite-scoped dynamic DNS updates with short-lived tokens"
   homepage "https://github.com/brandonscript/dnspoke"
-  url "https://github.com/brandonscript/dnspoke/archive/refs/tags/v0.1.3.tar.gz"
-  sha256 "9a2cef50b2f0c098e6cf419ce23c7432274f6295f6d62ed9350453a147866355"
+  url "https://github.com/brandonscript/dnspoke/archive/refs/tags/v0.1.5.tar.gz"
+  sha256 "e9f806ec0224f68539d5c7cd034d61a1785a33967759a1def0b0b8f40388683b"
   license "MIT"
   depends_on "python@3.14"
 
