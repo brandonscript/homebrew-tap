@@ -1,8 +1,8 @@
 class Dnspoke < Formula
   desc "Invite-scoped dynamic DNS updates with short-lived tokens"
   homepage "https://github.com/brandonscript/dnspoke"
-  url "https://github.com/brandonscript/dnspoke/archive/refs/tags/v0.1.0.tar.gz"
-  sha256 "909dac10eb1155c7efaef25f2543266f8c0f59656bab125e1bffa53056e75ac1"
+  url "https://github.com/brandonscript/dnspoke/archive/refs/tags/v0.1.1.tar.gz"
+  sha256 "7a72a3fd2e81719d657b5da89ccef0e42888a3305fac4cb90d344ed88c4323f4"
   license "MIT"
   depends_on "python@3.14"
 
@@ -41,5 +41,6 @@ class Dnspoke < Formula
   test do
     assert_match version.to_s, shell_output("#{bin}/dnspoke --version")
     assert_match "enroll", shell_output("#{bin}/dnspoke --help")
+    assert_match "invite", shell_output("#{bin}/dnspoke admin --help")
   end
 end
