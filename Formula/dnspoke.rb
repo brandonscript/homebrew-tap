@@ -10,7 +10,7 @@ class Dnspoke < Formula
     libexec.install "dnspoke"
     (bin/"dnspoke").write <<~SH
       #!/bin/sh
-      PYTHONPATH="#{libexec}" exec "#{Formula["python@3.14"].opt_bin}/python3.14" -m dnspoke.cli "$@"
+      PYTHONPATH="#{libexec}" exec "#{formula_opt_bin("python@3.14")}/python3.14" -m dnspoke.cli "$@"
     SH
   end
 
@@ -39,7 +39,7 @@ class Dnspoke < Formula
   end
 
   test do
-    assert_match "#{version}", shell_output("#{bin}/dnspoke --version")
+    assert_match version.to_s, shell_output("#{bin}/dnspoke --version")
     assert_match "enroll", shell_output("#{bin}/dnspoke --help")
   end
 end
